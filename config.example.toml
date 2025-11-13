@@ -1,0 +1,29 @@
+# human-release configuration example
+# This file demonstrates all available configuration options
+
+[llm]
+# LLM provider: "mistral", "openai", or other
+provider = "mistral"
+
+# Model name (depends on provider)
+# Mistral: "mistral-large-latest", "mistral-medium-latest", etc.
+# OpenAI: "gpt-4", "gpt-3.5-turbo", etc.
+model = "mistral-large-latest"
+
+# Optional: Custom API endpoint (for self-hosted or proxy)
+# base_url = "https://api.example.com"
+
+# API Key - RECOMMENDED to use environment variable instead:
+# export HUMAN_RELEASE_LLM_API_KEY=sk-xxx
+# api_key = ""
+
+[template]
+# Path to custom markdown template for release notes
+# Leave empty to use default template
+# path = "custom_template.md"
+path = ""
+
+[git]
+# Git references (can be overridden via CLI flags)
+# from_ref = "v1.0.0"
+# to_ref = "v1.1.0"
