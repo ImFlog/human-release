@@ -443,13 +443,14 @@ For issues, questions, or feature requests:
 ## Roadmap
 - `client.go` changes
   - [ ] Use langchain for LLM calls ? Or we could use an interface and implement for each provider manually (if langchain doesn't support multiple providers easily).
-  - [ ] Put prompts in separate files for easier editing.
+  - [ ] Put prompts in separate files for easier editing ?
   - [ ] Tune prompt for better summaries (bullet points, sorted by fix / features / tech debt, etc.)
 - `summarizer.go` changes
   - [ ] Improve commit categorization by letting the LLM decide category based on commit message + diff.
 - `generator.go` changes
-    - [ ] The format is not very good. Change it.
+  - [ ] The format is not very good. Change it.
   - [ ] Support additional output formats (HTML, JSON, etc.)
+- [ ] Use slog for structured logging
 - [ ] Add unit and integration tests for all components
 - [ ] Add badges (build status, license, etc.)
 - [ ] Add golangci-lint + configuration

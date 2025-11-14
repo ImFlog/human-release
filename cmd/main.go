@@ -93,7 +93,10 @@ func generateReleaseNotes() error {
 	fmt.Printf("Found %d commits. Generating summaries...\n", len(commits))
 
 	// Initialize LLM client
-	llmClient := llm.NewClient(&cfg.LLM)
+	llmClient, err := llm.NewClient(&cfg.LLM)
+	if err != nil {
+		return fmt.Errorf("failed to initialize LLM client: %w", err)
+	}
 
 	// Initialize summarizer
 	sum := summarizer.NewSummarizer(llmClient)

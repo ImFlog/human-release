@@ -4,13 +4,24 @@ import "time"
 
 // Commit represents a git commit with its changes
 type Commit struct {
-	Hash      string
-	Author    string
-	Date      time.Time
-	Message   string
-	Files     []string
-	Diff      string
-	Summary   string
+	Hash    string
+	Author  string
+	Date    time.Time
+	Message string
+	Files   []string
+	Diff    string
+	Summary string
+}
+
+type AICommitSummary struct {
+	BreakingChanges []string `json:"breaking_changes"`
+	Features        []string `json:"features"`
+	BugFixes        []string `json:"bug_fixes"`
+	Build           []string `json:"build"`
+	Refactor        []string `json:"refactor"`
+	Docs            []string `json:"docs"`
+	Chores          []string `json:"chores"`
+	Others          []string `json:"other_changes"`
 }
 
 // CommitSummary is the LLM-generated summary of a commit
@@ -23,24 +34,33 @@ type CommitSummary struct {
 
 // ReleaseNotes represents the final release notes
 type ReleaseNotes struct {
-	Version    string
-	Date       time.Time
-	FromRef    string
-	ToRef      string
-	Summaries  []CommitSummary
-	Content    string // Rendered markdown
+	Version   string
+	Date      time.Time
+	FromRef   string
+	ToRef     string
+	Summaries []CommitSummary
+	Content   string // Rendered markdown
 }
 
 // Config represents the application configuration
 type Config struct {
-	LLM LLMConfig
-	Git GitConfig
+	LLM      LLMConfig
+	Git      GitConfig
 	Template TemplateConfig
 }
 
+type LLMProvider string
+
+const (
+	ProviderOpenAI    LLMProvider = "openai"
+	ProviderAnthropic LLMProvider = "anthropic"
+	ProviderMistral   LLMProvider = "mistral"
+	ProviderGemini    LLMProvider = "gemini"
+)
+
 // LLMConfig holds LLM provider settings
 type LLMConfig struct {
-	Provider string // "openai", "anthropic", "other"
+	Provider LLMProvider
 	Model    string
 	ApiKey   string
 	BaseURL  string // optional, for custom endpoints
