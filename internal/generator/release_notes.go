@@ -1,6 +1,7 @@
 package generator
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"strings"
@@ -8,8 +9,10 @@ import (
 	"time"
 
 	"github.com/ImFlog/human-release/pkg/models"
-	"github.com/ImFlog/human-release/internal/summarizer"
 )
+
+//go:embed release_notes_default.tmpl
+var defaultTemplate []byte
 
 // Generator handles release notes generation
 type Generator struct {
@@ -25,8 +28,6 @@ func NewGenerator(templatePath string) *Generator {
 
 // Generate creates release notes from commit summaries
 func (g *Generator) Generate(fromRef, toRef string, summaries []models.CommitSummary) (*models.ReleaseNotes, error) {
-	organized := summarizer.OrganizeSummaries(summaries)
-
 	releaseNotes := &models.ReleaseNotes{
 		FromRef:   fromRef,
 		ToRef:     toRef,
@@ -35,66 +36,27 @@ func (g *Generator) Generate(fromRef, toRef string, summaries []models.CommitSum
 	}
 
 	// Try to load custom template if provided
-	var content string
-	var err error
-	if g.templatePath != "" && g.templatePath != "default" {
-		content, err = g.renderFromFile(fromRef, toRef, organized)
-		if err != nil {
-			// Fall back to default template
-			content = g.renderDefault(fromRef, toRef, organized)
-		}
-	} else {
-		content = g.renderDefault(fromRef, toRef, organized)
+	content, err := g.renderFromFile(fromRef, toRef, summaries)
+	if err != nil {
+		return nil, fmt.Errorf("failed to render release notes from template: %w", err)
 	}
 
 	releaseNotes.Content = content
 	return releaseNotes, nil
 }
 
-// renderDefault renders using the default template
-func (g *Generator) renderDefault(fromRef, toRef string, organized map[string][]models.CommitSummary) string {
-	var output strings.Builder
-
-	output.WriteString(fmt.Sprintf("# Release Notes: %s...%s\n\n", fromRef, toRef))
-	output.WriteString(fmt.Sprintf("*Generated on %s*\n\n", time.Now().Format(time.RFC1123)))
-
-	// Define category order
-	categoryOrder := []string{
-		"feature",
-		"bugfix",
-		"performance",
-		"refactor",
-		"test",
-		"docs",
-		"ci/cd",
-		"chore",
-		"other",
-	}
-
-	for _, category := range categoryOrder {
-		summaries, exists := organized[category]
-		if !exists || len(summaries) == 0 {
-			continue
-		}
-
-		output.WriteString(fmt.Sprintf("## %s\n\n", capitalizeCategory(category)))
-
-		for _, summary := range summaries {
-			output.WriteString(fmt.Sprintf("- **%s** - %s\n", summary.Title, summary.Description))
-			output.WriteString(fmt.Sprintf("  - Commit: `%s`\n", summary.CommitHash[:8]))
-		}
-		output.WriteString("\n")
-	}
-
-	return output.String()
-}
-
 // renderFromFile renders using a custom template file
-func (g *Generator) renderFromFile(fromRef, toRef string, organized map[string][]models.CommitSummary) (string, error) {
+func (g *Generator) renderFromFile(fromRef, toRef string, summaries []models.CommitSummary) (string, error) {
+	var tmplContent []byte
 	// Read template file
-	tmplContent, err := os.ReadFile(g.templatePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to read template file: %w", err)
+	if g.templatePath == "default" || g.templatePath == "" {
+		tmplContent = defaultTemplate
+	} else {
+		var err error
+		tmplContent, err = os.ReadFile(g.templatePath)
+		if err != nil {
+			return "", fmt.Errorf("failed to read template file: %w", err)
+		}
 	}
 
 	// Parse and execute template
@@ -103,11 +65,88 @@ func (g *Generator) renderFromFile(fromRef, toRef string, organized map[string][
 		return "", fmt.Errorf("failed to parse template: %w", err)
 	}
 
+	type categorySummary struct {
+		Title     string
+		Hash      string
+		Summaries string
+	}
+
+	// TODO: Flatten summaries by category for easier rendering
+	categories := map[string][]categorySummary{}
+	for _, sum := range summaries {
+		if sum.Summary == nil {
+			continue
+		}
+		for _, change := range sum.Summary.BreakingChanges {
+			categories["Breaking change"] = append(categories["breaking_changes"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.Features {
+			categories["Features"] = append(categories["feature"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.BugFixes {
+			categories["Fixes"] = append(categories["bugfix"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.Build {
+			categories["Technical"] = append(categories["Technical"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.Refactor {
+			categories["Technical"] = append(categories["Technical"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.Docs {
+			categories["Misc"] = append(categories["Misc"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.Chores {
+			categories["Misc"] = append(categories["Misc"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.Tests {
+			categories["Technical"] = append(categories["Technical"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+		for _, change := range sum.Summary.Others {
+			categories["Misc"] = append(categories["Misc"], categorySummary{
+				Title:     sum.Title,
+				Hash:      sum.CommitHash,
+				Summaries: change,
+			})
+		}
+	}
+
 	data := map[string]interface{}{
-		"FromRef":    fromRef,
-		"ToRef":      toRef,
-		"Date":       time.Now(),
-		"Organized":  organized,
+		"FromRef":              fromRef,
+		"ToRef":                toRef,
+		"Date":                 time.Now(),
+		"CategorizedSummaries": categories,
 	}
 
 	var output strings.Builder
@@ -116,26 +155,6 @@ func (g *Generator) renderFromFile(fromRef, toRef string, organized map[string][
 	}
 
 	return output.String(), nil
-}
-
-// capitalizeCategory returns a nice display name for a category
-func capitalizeCategory(category string) string {
-	categoryNames := map[string]string{
-		"feature":     "Features",
-		"bugfix":      "Bug Fixes",
-		"performance": "Performance Improvements",
-		"refactor":    "Refactoring",
-		"test":        "Tests",
-		"docs":        "Documentation",
-		"ci/cd":       "CI/CD",
-		"chore":       "Chores",
-		"other":       "Other",
-	}
-
-	if name, exists := categoryNames[category]; exists {
-		return name
-	}
-	return strings.ToTitle(category)
 }
 
 // WriteToFile writes the release notes to a file

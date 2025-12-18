@@ -27,13 +27,10 @@ func (s *Summarizer) SummarizeCommit(commit *models.Commit) (*models.CommitSumma
 		return nil, err
 	}
 
-	category := categorizeCommit(commit.Message, summary)
-
 	return &models.CommitSummary{
-		CommitHash:  commit.Hash,
-		Title:       extractTitle(commit.Message),
-		Description: summary,
-		Category:    category,
+		CommitHash: commit.Hash,
+		Title:      extractTitle(commit.Message),
+		Summary:    summary,
 	}, nil
 }
 
@@ -76,47 +73,6 @@ func (s *Summarizer) SummarizeCommits(commits []models.Commit) ([]models.CommitS
 	return results, nil
 }
 
-// categorizeCommit determines the category of a commit based on its message and summary
-func categorizeCommit(message, summary string) string {
-	lowerMsg := strings.ToLower(message)
-	lowerSum := strings.ToLower(summary)
-
-	if strings.Contains(lowerMsg, "feat:") || strings.Contains(lowerMsg, "feature") {
-		return "feature"
-	}
-	if strings.Contains(lowerMsg, "fix:") || strings.Contains(lowerMsg, "bug") {
-		return "bugfix"
-	}
-	if strings.Contains(lowerMsg, "docs:") || strings.Contains(lowerMsg, "documentation") {
-		return "docs"
-	}
-	if strings.Contains(lowerMsg, "refactor:") || strings.Contains(lowerMsg, "refactoring") {
-		return "refactor"
-	}
-	if strings.Contains(lowerMsg, "perf:") || strings.Contains(lowerMsg, "performance") {
-		return "performance"
-	}
-	if strings.Contains(lowerMsg, "test:") || strings.Contains(lowerMsg, "testing") {
-		return "test"
-	}
-	if strings.Contains(lowerMsg, "ci:") || strings.Contains(lowerMsg, "cd:") {
-		return "ci/cd"
-	}
-	if strings.Contains(lowerMsg, "chore:") {
-		return "chore"
-	}
-
-	// Fallback categorization based on summary
-	if strings.Contains(lowerSum, "added") || strings.Contains(lowerSum, "new") {
-		return "feature"
-	}
-	if strings.Contains(lowerSum, "fixed") || strings.Contains(lowerSum, "bug") {
-		return "bugfix"
-	}
-
-	return "other"
-}
-
 // extractTitle extracts the first line of the commit message as title
 func extractTitle(message string) string {
 	lines := strings.Split(message, "\n")
@@ -124,15 +80,4 @@ func extractTitle(message string) string {
 		return strings.TrimSpace(lines[0])
 	}
 	return ""
-}
-
-// OrganizeSummaries groups commit summaries by category
-func OrganizeSummaries(summaries []models.CommitSummary) map[string][]models.CommitSummary {
-	organized := make(map[string][]models.CommitSummary)
-
-	for _, summary := range summaries {
-		organized[summary.Category] = append(organized[summary.Category], summary)
-	}
-
-	return organized
 }
