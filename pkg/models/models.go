@@ -21,15 +21,15 @@ type AICommitSummary struct {
 	Refactor        []string `json:"refactor"`
 	Docs            []string `json:"docs"`
 	Chores          []string `json:"chores"`
+	Tests           []string `json:"tests"`
 	Others          []string `json:"other_changes"`
 }
 
 // CommitSummary is the LLM-generated summary of a commit
 type CommitSummary struct {
-	CommitHash  string
-	Title       string
-	Description string
-	Category    string // e.g., "feature", "bugfix", "docs", "refactor"
+	CommitHash string
+	Title      string
+	Summary    *AICommitSummary
 }
 
 // ReleaseNotes represents the final release notes
@@ -56,6 +56,7 @@ const (
 	ProviderAnthropic LLMProvider = "anthropic"
 	ProviderMistral   LLMProvider = "mistral"
 	ProviderGemini    LLMProvider = "gemini"
+	ProviderOllama    LLMProvider = "ollama"
 )
 
 // LLMConfig holds LLM provider settings

@@ -14,14 +14,13 @@ No more manually reviewing every commit to write release notes. Just point it at
 
 ## Features
 
-- 🚀 **Multi-LLM Support** - Works with Mistral, OpenAI, and extensible for other providers
-- 📝 **Smart Categorization** - Automatically categorizes commits (feature, bugfix, docs, refactor, etc.)
-- ⚡ **Concurrent Processing** - Summarizes multiple commits in parallel for speed
-- 🎯 **Flexible References** - Supports commit hashes, tags, and branch names
-- 🔧 **Customizable** - Custom Markdown templates for release notes format
-- 📋 **Unified Configuration** - TOML config files + environment variables via Viper
-- 🔐 **Secure** - API keys via environment variables (not in config files)
-- 📦 **Zero External Dependencies** - Pure Go implementation using go-git library
+- 🚀 **Multi-LLM Support**: Works with Mistral, OpenAI, and extensible for other providers
+- 📝 **Smart Categorization**: Automatically categorizes commits (feature, bugfix, docs, refactor, etc.)
+- ⚡ **Concurrent Processing**: Summarizes multiple commits in parallel for speed
+- 🎯 **Flexible References**: Supports commit hashes, tags, and branch names
+- 🔧 **Customizable**: Custom Markdown templates for release notes format
+- 📋 **Unified Configuration**: TOML config files + environment variables via Viper
+- 🔐 **Secure**: API keys via environment variables (not in config files)
 
 ## Installation
 
@@ -299,16 +298,9 @@ go test -cover ./...
 
 ## Performance Considerations
 
-- **Concurrent Summarization** - Default limit is 5 concurrent LLM calls to avoid rate limiting
-- **Commit Count** - Performance scales linearly with number of commits to summarize
-- **LLM Response Time** - Most of the time is spent waiting for LLM API responses
-
-Typical performance:
-- 10 commits: ~10-15 seconds
-- 50 commits: ~50-75 seconds
-- 100 commits: ~100-150 seconds
-
-(Times vary based on LLM provider and API latency)
+- **Concurrent Summarization**:  Default limit is 5 concurrent LLM calls to avoid rate limiting
+- **Commit Count**: Performance scales linearly with the number of commits to summarize
+- **LLM Response Time**: Most of the time is spent waiting for LLM API responses
 
 ## Troubleshooting
 
@@ -442,15 +434,14 @@ For issues, questions, or feature requests:
 
 ## Roadmap
 - `client.go` changes
-  - [ ] Use langchain for LLM calls ? Or we could use an interface and implement for each provider manually (if langchain doesn't support multiple providers easily).
-  - [ ] Put prompts in separate files for easier editing ?
+  - [ ] Put prompts in separate files to simplify the edition ?
   - [ ] Tune prompt for better summaries (bullet points, sorted by fix / features / tech debt, etc.)
-- `summarizer.go` changes
-  - [ ] Improve commit categorization by letting the LLM decide category based on commit message + diff.
 - `generator.go` changes
   - [ ] The format is not very good. Change it.
+  - [ ] Possibility to provide a template.
   - [ ] Support additional output formats (HTML, JSON, etc.)
-- [ ] Use slog for structured logging
+  - [ ] Link to a commit hash or PR in the summary
+- [ ] Add some logging
 - [ ] Add unit and integration tests for all components
 - [ ] Add badges (build status, license, etc.)
 - [ ] Add golangci-lint + configuration

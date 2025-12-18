@@ -1,0 +1,12 @@
+# Release Notes: {{ .FromRef }}...{{ .ToRef }}
+
+*Generated on {{ .Date.Format "Mon, Jan 2, 2006" }}*
+
+{{ range $category, $summaries := .CategorizedSummaries }}
+
+## {{ $category }}
+{{ range $summary := $summaries.Summaries }}
+- **{{ $summary.Title }}** - {{ $summary }} (Commit: `{{ truncateHash $summary.CommitHash }}`)
+{{ end }}
+
+{{ end }}
