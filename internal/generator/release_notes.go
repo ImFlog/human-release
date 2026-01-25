@@ -66,9 +66,9 @@ func (g *Generator) renderFromFile(fromRef, toRef string, summaries []models.Com
 	}
 
 	type categorySummary struct {
-		Title     string
-		Hash      string
-		Summaries string
+		Title   string
+		Hash    string
+		Content string
 	}
 
 	// TODO: Flatten summaries by category for easier rendering
@@ -79,65 +79,37 @@ func (g *Generator) renderFromFile(fromRef, toRef string, summaries []models.Com
 		}
 		for _, change := range sum.Summary.BreakingChanges {
 			categories["Breaking change"] = append(categories["breaking_changes"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
+				Title:   sum.Title,
+				Hash:    sum.CommitHash,
+				Content: change,
 			})
 		}
 		for _, change := range sum.Summary.Features {
 			categories["Features"] = append(categories["feature"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
+				Title:   sum.Title,
+				Hash:    sum.CommitHash,
+				Content: change,
 			})
 		}
 		for _, change := range sum.Summary.BugFixes {
 			categories["Fixes"] = append(categories["bugfix"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
-			})
-		}
-		for _, change := range sum.Summary.Build {
-			categories["Technical"] = append(categories["Technical"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
+				Title:   sum.Title,
+				Hash:    sum.CommitHash,
+				Content: change,
 			})
 		}
 		for _, change := range sum.Summary.Refactor {
 			categories["Technical"] = append(categories["Technical"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
-			})
-		}
-		for _, change := range sum.Summary.Docs {
-			categories["Misc"] = append(categories["Misc"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
-			})
-		}
-		for _, change := range sum.Summary.Chores {
-			categories["Misc"] = append(categories["Misc"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
-			})
-		}
-		for _, change := range sum.Summary.Tests {
-			categories["Technical"] = append(categories["Technical"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
+				Title:   sum.Title,
+				Hash:    sum.CommitHash,
+				Content: change,
 			})
 		}
 		for _, change := range sum.Summary.Others {
 			categories["Misc"] = append(categories["Misc"], categorySummary{
-				Title:     sum.Title,
-				Hash:      sum.CommitHash,
-				Summaries: change,
+				Title:   sum.Title,
+				Hash:    sum.CommitHash,
+				Content: change,
 			})
 		}
 	}

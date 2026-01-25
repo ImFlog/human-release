@@ -3,10 +3,8 @@
 *Generated on {{ .Date.Format "Mon, Jan 2, 2006" }}*
 
 {{ range $category, $summaries := .CategorizedSummaries }}
-
 ## {{ $category }}
-{{ range $summary := $summaries.Summaries }}
-- **{{ $summary.Title }}** - {{ $summary }} (Commit: `{{ truncateHash $summary.CommitHash }}`)
+{{ range $summary := $summaries }}
+- **{{ $summary.Title }}** - {{ $summary.Content }} (Commit: `{{ $summary.Hash }}`)
 {{ end }}
-
 {{ end }}

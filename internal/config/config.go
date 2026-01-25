@@ -17,8 +17,10 @@ func LoadConfig(configPath string) (*models.Config, error) {
 	v.AutomaticEnv()
 
 	// Bind specific environment variables
-	v.BindEnv("llm.api_key", "HUMAN_RELEASE_LLM_API_KEY")
-	v.BindEnv("llm.base_url", "HUMAN_RELEASE_LLM_BASE_URL")
+	v.BindEnv("llm.provider", "HUMAN_RELEASE_LLM_PROVIDER")
+	v.BindEnv("llm.apikey", "HUMAN_RELEASE_LLM_API_KEY")
+	v.BindEnv("llm.baseurl", "HUMAN_RELEASE_LLM_BASE_URL")
+	v.BindEnv("llm.model", "HUMAN_RELEASE_LLM_MODEL")
 
 	// Load from config file if provided
 	if configPath != "" {
