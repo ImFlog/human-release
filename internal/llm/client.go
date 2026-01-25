@@ -40,6 +40,14 @@ func NewClient(config *models.LLMConfig) (*Client, error) {
 // SummarizeCommit generates a summary for a commit using the LLM
 func (c *Client) SummarizeCommit(commit *models.Commit) (*models.AICommitSummary, error) {
 	prompt := fmt.Sprintf(`You are an expert software engineer skilled in summarizing code changes.
+For each commit define a description of the change, It should not exceed 100 characters.
+Then categorize the change into one of the following categories:
+* breaking_changes = a change that changes an breaks existing usage (a breaking API contract for instance)
+* feat = a new feature
+* fix = a bug fix, a minor change
+* refactor = a code change that does not affect the behavior of the code
+* other_changes = a change that does not fit into any of the above categories
+
 Use the following commit information to generate a summary and categorize the changes.
 
 Commit Message: %s
@@ -47,17 +55,12 @@ Files Changed: %v
 Diff Stats:
 %s
 
-For each category, list the relevant changes found in the commit. Each change should be a one-liner description.
 Respond with the following JSON format:
 {
   "breaking_changes": ["...", "..."],
-  "features": ["...", "..."],
-  "bug_fixes": ["...", "..."],
-  "build": ["...", "..."],
+  "feat": ["...", "..."],
+  "fix": ["...", "..."],
   "refactor": ["...", "..."],
-  "docs": ["...", "..."],
-  "chores": ["...", "..."],
-  "tests": ["...", "..."],
   "other_changes": ["...", "..."]
 }`, commit.Message, commit.Files, commit.Diff)
 

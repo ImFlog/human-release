@@ -430,7 +430,6 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 For issues, questions, or feature requests:
 - Open an issue on [GitHub](https://github.com/ImFlog/human-release/issues)
-- Check existing documentation in [CLAUDE.md](./CLAUDE.md)
 
 ## Roadmap
 - `client.go` changes

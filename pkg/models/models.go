@@ -15,13 +15,9 @@ type Commit struct {
 
 type AICommitSummary struct {
 	BreakingChanges []string `json:"breaking_changes"`
-	Features        []string `json:"features"`
-	BugFixes        []string `json:"bug_fixes"`
-	Build           []string `json:"build"`
+	Features        []string `json:"feat"`
+	BugFixes        []string `json:"fix"`
 	Refactor        []string `json:"refactor"`
-	Docs            []string `json:"docs"`
-	Chores          []string `json:"chores"`
-	Tests           []string `json:"tests"`
 	Others          []string `json:"other_changes"`
 }
 

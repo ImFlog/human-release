@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ImFlog/human-release/pkg/models"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/ImFlog/human-release/pkg/models"
 )
 
 // Parser handles git repository operations
@@ -38,39 +38,30 @@ func (p *Parser) GetCommits(fromRef, toRef string) ([]models.Commit, error) {
 		return nil, fmt.Errorf("failed to resolve 'to' reference: %w", err)
 	}
 
-	// Get commits reachable from toHash but not from fromHash
-	iter, err := p.repo.Log(&git.LogOptions{
-		From: toHash,
-	})
+	exclude, err := p.collectCommitHashes(fromHash)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get log: %w", err)
+		return nil, fmt.Errorf("failed to collect 'from' commits: %w", err)
 	}
 
+	toCommit, err := p.repo.CommitObject(toHash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get 'to' commit: %w", err)
+	}
+
+	iter := object.NewCommitPreorderIter(toCommit, exclude, nil)
+
 	var commits []models.Commit
-	seen := make(map[plumbing.Hash]bool)
-
 	err = iter.ForEach(func(c *object.Commit) error {
-		if c.Hash == fromHash {
-			return nil // Stop when we reach the from commit
-		}
-
-		if seen[c.Hash] {
-			return nil
-		}
-		seen[c.Hash] = true
-
 		// Get the diff for this commit
 		var patch bytes.Buffer
 		stats, err := c.Stats()
+		files := []string{}
 		if err == nil {
+			files = make([]string, 0, len(stats))
 			for _, stat := range stats {
 				patch.WriteString(stat.String() + "\n")
+				files = append(files, stat.Name)
 			}
-		}
-
-		files := []string{}
-		for _, stat := range stats {
-			files = append(files, stat.Name)
 		}
 
 		commit := models.Commit{
@@ -91,6 +82,25 @@ func (p *Parser) GetCommits(fromRef, toRef string) ([]models.Commit, error) {
 	}
 
 	return commits, nil
+}
+
+func (p *Parser) collectCommitHashes(start plumbing.Hash) (map[plumbing.Hash]bool, error) {
+	commit, err := p.repo.CommitObject(start)
+	if err != nil {
+		return nil, err
+	}
+
+	hashes := make(map[plumbing.Hash]bool)
+	iter := object.NewCommitPreorderIter(commit, nil, nil)
+	err = iter.ForEach(func(c *object.Commit) error {
+		hashes[c.Hash] = true
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return hashes, nil
 }
 
 // resolveRef converts a reference (tag, branch, or commit hash) to a commit hash
